@@ -1,0 +1,44 @@
+import logging
+import telegram
+from telegram.ext import Updater, MessageHandler, Filters
+
+import openai
+
+# Set your Telegram bot token and GPT-3.5 API key
+TELEGRAM_TOKEN = '6476608274:AAFlhfopN1s84XL2Ta6MFk_BusEVjRSyhEw'
+OPENAI_API_KEY = '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'
+
+# Initialize the Telegram bot
+bot = telegram.Bot(token=TELEGRAM_TOKEN)
+
+# Initialize the GPT-3.5 API
+openai.api_key = OPENAI_API_KEY
+
+# Define a handler for incoming messages
+def handle_message(update, context):
+    user_message = update.message.text
+
+    # Call GPT-3.5 to generate a response
+    response = openai.Completion.create(
+        engine="text-davinci-003",  # You can adjust the engine type
+        prompt=user_message,
+        max_tokens=50  # Adjust the length of the response
+    )
+
+    bot_response = response.choices[0].text.strip()
+
+    # Send the response back to the user
+    update.message.reply_text(bot_response)
+
+def main():
+    updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
+    dp = updater.dispatcher
+
+    # Handle incoming messages with the handle_message function
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
